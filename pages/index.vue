@@ -3,9 +3,39 @@
     layout: false,
   })
 
-  const register = () => {
-    navigateTo('/register')
+  const email = defineModel('email')
+  const password = defineModel('password')
+
+  const handleLogin = async () => {
+    if (!email.value || !password.value) {
+      alert('Please input email/password')
+      return
+    }
+    const variables = { 
+      email: email.value,
+      password: password.value,
+    }
+    try {
+      const result = await GqlLoginMutation(variables)
+      console.log(result)
+      if ( result.login === 'Invalid') {
+        alert('Invalid email/password.')
+        return
+      }
+      // save token
+      useGqlToken(result.login)
+      navigateTo('/home')
+    } catch(e) {
+      console.log(e)
+      alert('Invalid email/password.')
+    }
+  
   }
+  onMounted(() => {
+    if (localStorage.getItem('gql:default')) {
+      navigateTo('/home')
+    }
+  })
 </script>
 
 <template>
@@ -15,16 +45,12 @@
         <v-form ref="form">
           <v-text-field
             v-model="email"
-            :counter="10"
-            :rules="nameRules"
             label="Email"
             required
           ></v-text-field>
 
           <v-text-field
             v-model="password"
-            :readonly="loading"
-            :rules="[required]"
             label="Password"
             placeholder="Enter your password"
             clearable
@@ -36,7 +62,7 @@
               class="mt-4"
               color="secondary"
               block
-              @click="validate"
+              @click="handleLogin"
             >
               Login
             </v-btn>
@@ -44,7 +70,7 @@
             <v-btn
               class="mt-4"
               block
-              @click="register"
+              @click="navigateTo('/register')"
             >
               Create Account
             </v-btn>

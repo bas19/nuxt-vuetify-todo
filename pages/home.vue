@@ -1,44 +1,77 @@
 <script setup>
 import Todo from '../components/Todo.vue'
 
-const newTodo = ref(null);
-const items = ref([
-  { id: 1, todo: 'Todo 1', done: false },
-  { id: 2, todo: 'Todo 2', done: false },
-  { id: 3, todo: 'Todo 3', done: false },
-  { id: 4, todo: 'Todo 4', done: false },
-  { id: 5, todo: 'Todo 5', done: false },
-])
+const new_todo = ref(null);
+const user_id = ref(null);
 
-const addTodo = () => {
-  let data = items.value.slice();
-  data.unshift({
-    id: ++items.value.length,
-    todo: newTodo.value,
-    done: false,
+const items = ref([])
+
+const addTodo = async () => {
+  try {
+    const input = { todo: new_todo.value, user: { connect: user_id.value } }
+    const result = await GqlCreateTodoMutation({input: input})
+    if ( result ) {
+      new_todo.value = null;
+      let data = items.value.slice();
+      data.unshift({
+        id: result.createTodo.id,
+        todo: result.createTodo.todo,
+        done: false,
+      })
+      items.value = data;
+    }
+  } catch(e) {
+    console.log(e)
+  }
+}
+
+const updateTodo = async (data) => {
+  const update_todo = await GqlUpdateTodoMutation({
+    id: data.id,
+    todo: data.todo
   })
-  items.value = data;
 }
 
-const updateTodo = (data) => {
-  console.log(data);
-  // items.value[index].name = 'Test 1'
-  // call API endpoint to update
+const doneTodo = async (data) => {
+  const update_todo = await GqlUpdateTodoMutation({
+    id: data.id,
+    todo: data.todo,
+    is_done: data.is_done ? 1 : 0,
+  })
 }
 
-const deleteTodo = (index) => {
+const deleteTodo = async (index, id) => {
   items.value.splice(index, 1)
+  const deleted_todo = await GqlDeleteTodoMutation({
+    id: id
+  })
+  console.log(deleted_todo)
 }
+
+const getUserInfo = async () => {
+  const user = await GqlGetUser()
+  console.log('user data', user)
+  user_id.value = user.me.id
+  items.value = user.me.todos
+  localStorage.setItem('user_id', user.me.id)
+  localStorage.setItem('user_name', user.me.name)
+  localStorage.setItem('user_email', user.me.email)
+}
+
+onMounted(() => {
+  getUserInfo()
+})
+
 </script>
 
 <template>
   <div>
     <v-container>
-      <v-sheet class="mx-auto pa-4" width="500">
+      <v-sheet class="mx-auto pa-4" width="800">
         <v-text-field
           label="Add new todo"
           type="text"
-          v-model="newTodo"
+          v-model="new_todo"
           clearable
         >
           <template #append>
@@ -58,11 +91,13 @@ const deleteTodo = (index) => {
         <div>
           <Todo
             v-for="(item, index) in items" :key="index"
+            :id="item.id"
             :todo="item.todo"
-            :done="item.done"
+            :is_done="item.is_done"
             v-model="item.todo"
+            @doneTodo="doneTodo"
             @updateTodo="updateTodo"
-            @deleteTodo="deleteTodo(index)"
+            @deleteTodo="deleteTodo(index, item.id)"
           />
         </div>
       </v-sheet>

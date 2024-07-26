@@ -1,25 +1,30 @@
 <script setup>
 import { ref, watch } from 'vue'
 const showSaveBtn = ref(false)
+const newTodo = ref(null)
+
 const props = defineProps({
   id: Number,
   todo: String,
-  done: Boolean,
+  is_done: Boolean,
 })
-const emit = defineEmits(["updateTodo", "deleteTodo"]);
-const updateTodo = (value) => {
-  if (value != props.todo.value ) {
-    showSaveBtn.value = true
-  }
+const emit = defineEmits(["updateTodo", "deleteTodo", "doneTodo"]);
+
+const editTodo = (id, todo) => {
+  showSaveBtn.value = !showSaveBtn
   emit('updateTodo', {
-    id: props.id,
-    todo: value
+    id: id,
+    todo: newTodo.value,
+    is_done: 0,
   })
 }
 
-const editTodo = () => {
-  showSaveBtn.value = !showSaveBtn;
-  // emit('editTodo', props.id)
+const doneTodo = (data) => {
+  emit('doneTodo', {
+    id: props.id,
+    todo: props.todo,
+    is_done: !props.is_done,
+  })
 }
 
 const deleteTodo = () => {
@@ -36,33 +41,39 @@ const deleteTodo = () => {
       :model-value="todo"
       variant="outlined"
       @click:clear="editTodo"
-      @keyup="updateTodo($event.target.value)"
+      @keyup="checkTodo($event.target.value)"
+      :key="id"
     >
+      <template #prepend>
+        <v-checkbox
+          :key="props.id"
+          :model-value="props.is_done ? true : false"
+          @click="doneTodo(props.id, props.todo, props.is_done)"
+        ></v-checkbox>
+      </template>
       <template #append>
         <v-btn
           size="small"
-          color="primary"
+          color="secondary"
+          @click="editTodo(props.id, props.todo)"
           v-if="showSaveBtn"
         >
           Save
         </v-btn>
-        <!-- <v-btn
-          size="small"
-          variant="text"
-          v-if="!edited"
-        >
-          Done
-        </v-btn> -->
         <v-btn
-          class="ml-2"
-          color="red"
-          type="submit"
-          size="small"
-          @click="deleteTodo"
-          v-if="!showSaveBtn"
-        >
-          Delete
-        </v-btn>
+            prepend-icon="mdi-trash-can"
+            @click="deleteTodo"
+            v-if="!showSaveBtn"
+            class="ml-2"
+            type="submit"
+            size="small"
+            variant="flat"
+          >
+            <template v-slot:prepend>
+              <v-icon color="red"></v-icon>
+            </template>
+            Delete
+          </v-btn>
       </template>
     </v-text-field>
   </div>

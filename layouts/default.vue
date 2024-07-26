@@ -1,7 +1,20 @@
 <script setup>
-const logout = () => {
+
+const user_name = ref(null);
+const user_email = ref(null);
+
+const logout = async () => {
+  await GqlLogoutMutation
+  localStorage.clear();
+  useGqlToken(null)
   navigateTo('/')
 }
+
+onBeforeMount(() => {
+  user_name.value = localStorage.getItem('user_name')
+  user_email.value = localStorage.getItem('user_email')
+})
+
 </script>
 <template>
   <div>
@@ -12,8 +25,8 @@ const logout = () => {
       >
         <v-list>
           <v-list-item
-            subtitle="sandra_a88@gmail.com"
-            title="Sandra Adams"
+            :subtitle="user_email"
+            :title="user_name"
             prepend-icon="mdi-account"
           />
         </v-list>

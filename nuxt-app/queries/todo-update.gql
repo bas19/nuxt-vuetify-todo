@@ -1,0 +1,7 @@
+mutation UpdateTodoMutation($id: ID!, $todo: String!, $is_done: Int!) {
+  updateTodo(id: $id, todo: $todo, is_done: $is_done) {
+    id
+    todo
+    is_done
+  }
+}
