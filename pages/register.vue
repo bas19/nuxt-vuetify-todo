@@ -4,7 +4,7 @@
   })
   import { reactive } from 'vue'
   import { useVuelidate } from '@vuelidate/core'
-  import { sameAs, required } from '@vuelidate/validators'
+  import { required } from '@vuelidate/validators'
 
   const initialState = {
     name: '',

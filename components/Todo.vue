@@ -19,7 +19,6 @@ const editTodo = () => {
   })
 }
 
-
 const checkTodo = (value) => {
   newTodo.value = value
   if (value != props.todo.value ) {
@@ -45,15 +44,16 @@ const deleteTodo = () => {
   <div class="wrapper">
     <v-text-field
       type="text"
-      clearable
       :model-value="todo"
-      variant="outlined"
       @click:clear="editTodo"
       @keyup="checkTodo($event.target.value)"
       :key="id"
+      clearable
+      outline
     >
       <template #prepend>
         <v-checkbox
+          class="mt-6"
           :key="props.id"
           :model-value="props.is_done ? true : false"
           @click="doneTodo(props.id, props.todo, props.is_done)"
