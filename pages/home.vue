@@ -28,7 +28,8 @@ const addTodo = async () => {
 const updateTodo = async (data) => {
   const update_todo = await GqlUpdateTodoMutation({
     id: data.id,
-    todo: data.todo
+    todo: data.todo,
+    is_done: data.is_done,
   })
 }
 

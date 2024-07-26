@@ -10,13 +10,21 @@ const props = defineProps({
 })
 const emit = defineEmits(["updateTodo", "deleteTodo", "doneTodo"]);
 
-const editTodo = (id, todo) => {
-  showSaveBtn.value = !showSaveBtn
+const editTodo = () => {
+  showSaveBtn.value = !showSaveBtn.value
   emit('updateTodo', {
-    id: id,
+    id: props.id,
     todo: newTodo.value,
-    is_done: 0,
+    is_done: props.is_done,
   })
+}
+
+
+const checkTodo = (value) => {
+  newTodo.value = value
+  if (value != props.todo.value ) {
+    showSaveBtn.value = true
+  }
 }
 
 const doneTodo = (data) => {
@@ -55,7 +63,7 @@ const deleteTodo = () => {
         <v-btn
           size="small"
           color="secondary"
-          @click="editTodo(props.id, props.todo)"
+          @click="editTodo"
           v-if="showSaveBtn"
         >
           Save
